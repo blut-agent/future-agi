@@ -98,6 +98,8 @@ def run_eval(request: EvalRequest) -> EvalResult:
     call_type = request.inputs.get("call_type", "")
     if call_type in ("protect", "protect_flash") and eval_type_id != "DeterministicEvaluator":
         eval_type_id = "DeterministicEvaluator"
+        # Patch template config so format_eval_value uses DeterministicEvaluator branch
+        eval_template.config = {**eval_template.config, "eval_type_id": "DeterministicEvaluator"}
         if not request.model:
             request.model = "protect_flash" if call_type == "protect_flash" else "protect"
 
