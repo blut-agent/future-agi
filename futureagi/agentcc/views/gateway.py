@@ -611,12 +611,14 @@ class AgentccGatewayViewSet(ViewSet):
                 "bias_detection",
                 "prompt_injection",
                 "data_privacy_compliance",
-                "protect_flash",
+                "pii",
+                "content_moderation",
             ]
 
-            templates = EvalTemplate.no_workspace_objects.filter(
+            templates = EvalTemplate.objects.filter(
                 owner="system",
                 deleted=False,
+                config__eval_type_id="DeterministicEvaluator",
                 name__in=protect_metrics,
             ).values("eval_id", "name", "description")
 
@@ -787,10 +789,8 @@ class AgentccGatewayViewSet(ViewSet):
                 owner="playground",
                 metadata={
                     "org_id": str(org_id),
-                    "type": "internal",
                     "purpose": "playground-testing",
                     "allow_policy_override": "true",
-                    "access_groups": "internal",
                 },
             )
             return result.get("id", ""), result.get("key", "")
