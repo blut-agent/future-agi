@@ -431,47 +431,13 @@ def _transform_budgets(budgets):
     return result
 
 
-def _duration_to_seconds(val):
-    """Convert a duration string like '5m', '1h', '30s' to int seconds. Pass through ints."""
-    if isinstance(val, (int, float)):
-        return int(val)
-    if not isinstance(val, str):
-        return 0
-    val = val.strip().lower()
-    if val.endswith("m"):
-        return int(float(val[:-1]) * 60)
-    if val.endswith("h"):
-        return int(float(val[:-1]) * 3600)
-    if val.endswith("s"):
-        return int(float(val[:-1]))
-    try:
-        return int(val)
-    except (ValueError, TypeError):
-        return 0
-
-
-def _normalize_cache(cache):
-    """Ensure cache config has int types where Go expects them."""
-    if not cache or not isinstance(cache, dict):
-        return cache
-    result = dict(cache)
-    if "default_ttl" in result:
-        result["default_ttl"] = _duration_to_seconds(result["default_ttl"])
-    if "max_entries" in result:
-        try:
-            result["max_entries"] = int(result["max_entries"])
-        except (ValueError, TypeError):
-            result["max_entries"] = 10000
-    return result
-
-
 def _build_payload(org_id, config):
     """Build the config payload for the gateway, assembling providers from credentials."""
     return {
         "providers": _assemble_providers(org_id),
         "guardrails": _transform_guardrails(config.guardrails, org_id=org_id),
         "routing": config.routing,
-        "cache": _normalize_cache(config.cache),
+        "cache": config.cache,
         "rate_limiting": config.rate_limiting,
         "budgets": _transform_budgets(config.budgets),
         "cost_tracking": config.cost_tracking,
